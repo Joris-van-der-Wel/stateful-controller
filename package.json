@@ -1,6 +1,6 @@
 {
   "name": "stateful-controller",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "This module provides a Controller class that implements the stateful controller pattern. Users can inherit from this class to implement their own stateful controllers. This pattern is useful for implementing single page web applications.",
   "main": "./lib/Controller.js",
   "scripts": {
