@@ -658,6 +658,77 @@ module.exports = {
                         t.done();
                 });
         },
+        'grandchild transition to no children': function(t)
+        {
+                var myParent = new Controller(); myParent.dbg = 'myParent';
+                var myChild = new Controller(); myChild.dbg = 'myChild';
+                var myGrandChild = new Controller(); myGrandChild.dbg = 'myGrandChild';
+                var parentEnters = 0;
+                var childEnters = 0;
+                var grandChildEnters = 0;
+
+                myParent.enterFoo = function(state, upgrade)
+                {
+                        ++parentEnters;
+                        t.strictEqual(1, parentEnters);
+                        t.strictEqual('foo', state);
+                        t.strictEqual('foo', this.currentState);
+                        this.child = myChild;
+                };
+
+                myParent.enterQwerty = function(state, upgrade)
+                {
+                        ++parentEnters;
+                        t.strictEqual(2, parentEnters);
+                        t.strictEqual('qwerty', state);
+                        t.strictEqual('qwerty', this.currentState);
+                        this.child = null;
+                };
+
+                myChild.enterBar = function(state, upgrade)
+                {
+                        ++childEnters;
+                        t.strictEqual(1, parentEnters);
+                        t.strictEqual(1, childEnters);
+                        t.strictEqual('bar', state);
+                        t.strictEqual('bar', this.currentState);
+                        this.child = myGrandChild;
+                };
+
+                myGrandChild.enterBaz = function(state, upgrade)
+                {
+                        ++grandChildEnters;
+                        t.strictEqual(1, parentEnters);
+                        t.strictEqual(1, childEnters);
+                        t.strictEqual(1, grandChildEnters);
+                        t.strictEqual('baz', state);
+                        t.strictEqual('baz', this.currentState);
+                };
+
+                myParent.state(['foo', 'bar', 'baz'])
+                .then(function()
+                {
+                        t.strictEqual(1, parentEnters);
+                        t.strictEqual(1, childEnters);
+                        t.strictEqual('foo', myParent.currentState);
+                        t.ok(myParent.child === myChild);
+                        t.strictEqual('bar', myParent.child.currentState);
+
+                        console.info('Switching...');
+                        return myParent.state(['qwerty']);
+                })
+                .then(function()
+                {
+                        t.strictEqual(2, parentEnters);
+                        t.strictEqual(1, childEnters);
+                        t.strictEqual(1, grandChildEnters);
+                        t.strictEqual('qwerty', myParent.currentState);
+                        t.strictEqual(null, myChild.currentState);
+                        t.strictEqual(null, myGrandChild.currentState);
+                        t.done();
+                });
+
+        },
         'getRootController()': function(t)
         {
                 var a = new Controller.Dummy();

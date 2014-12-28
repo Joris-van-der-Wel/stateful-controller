@@ -162,8 +162,6 @@ MyController.prototype.leaveContentPage = function(state)
     this.header = null;
     this.pageContent = null;
     this.footer = null;
-
-    this.child = null;
 };
 ```
 
@@ -355,8 +353,6 @@ FrontController.prototype.leaveContentPage = function(state)
     this.header = null;
     this.pageContent = null;
     this.footer = null;
-
-    this.child = null;
 };
 ```
 
