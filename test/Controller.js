@@ -95,7 +95,6 @@ module.exports = {
                         ++beforeEnters;
                         t.strictEqual(1, beforeEnters);
                         t.strictEqual('foo', state);
-                        t.strictEqual(false, upgrade); // false by default
                         t.strictEqual('this is my context', this.context);
                         t.strictEqual(null, this.currentState);
 
@@ -107,7 +106,6 @@ module.exports = {
                         ++enters;
                         t.strictEqual(1, enters);
                         t.strictEqual('foo', state);
-                        t.strictEqual(false, upgrade); // false by default
                         t.strictEqual('this is my context', this.context);
                         t.strictEqual('foo', this.currentState);
 
@@ -714,7 +712,6 @@ module.exports = {
                         t.ok(myParent.child === myChild);
                         t.strictEqual('bar', myParent.child.currentState);
 
-                        console.info('Switching...');
                         return myParent.state(['qwerty']);
                 })
                 .then(function()
@@ -781,15 +778,15 @@ module.exports = {
                 c.child = d;
 
                 a.state(['a', 'b', 'c', 'd'])
-                        .then(function()
-                        {
-                                t.deepEqual([             ], a.getParentsStateList());
-                                t.deepEqual(['a'          ], b.getParentsStateList());
-                                t.deepEqual(['a', 'b'     ], c.getParentsStateList());
-                                t.deepEqual(['a', 'b', 'c'], d.getParentsStateList());
+                .then(function()
+                {
+                        t.deepEqual([             ], a.getParentsStateList());
+                        t.deepEqual(['a'          ], b.getParentsStateList());
+                        t.deepEqual(['a', 'b'     ], c.getParentsStateList());
+                        t.deepEqual(['a', 'b', 'c'], d.getParentsStateList());
 
-                                t.done();
-                        });
+                        t.done();
+                });
         },
         'getFullStateList()': function(t)
         {
@@ -817,6 +814,75 @@ module.exports = {
 
                         t.done();
                 });
+        },
+        'upgrade default': function(t)
+        {
+                var parent = new Controller();
+                var child = new Controller();
+
+                parent.beforeEnter = function(state, upgrade)
+                {
+                        t.strictEqual(false, upgrade);
+                };
+
+                parent.enterFoo = function(state, upgrade)
+                {
+                        t.strictEqual(false, upgrade);
+                        this.child = child;
+                };
+
+                child.beforeEnter = function(state, upgrade)
+                {
+                        t.strictEqual(false, upgrade);
+                };
+
+                child.enterBar = function(state, upgrade)
+                {
+                        t.strictEqual(false, upgrade);
+                };
+
+                t.expect(5);
+
+                parent.state(['foo', 'bar'])
+                .then(function()
+                {
+                        t.strictEqual('foo', parent.currentState);
+                        t.done();
+                });
+        },
+        'upgrade': function(t)
+        {
+                var parent = new Controller();
+                var child = new Controller();
+
+                parent.beforeEnter = function(state, upgrade)
+                {
+                        t.strictEqual(true, upgrade);
+                };
+
+                parent.enterFoo = function(state, upgrade)
+                {
+                        t.strictEqual(true, upgrade);
+                        this.child = child;
+                };
+
+                child.beforeEnter = function(state, upgrade)
+                {
+                        t.strictEqual(true, upgrade);
+                };
+
+                child.enterBar = function(state, upgrade)
+                {
+                        t.strictEqual(true, upgrade);
+                };
+
+                t.expect(5);
+
+                parent.state(['foo', 'bar'], true)
+                .then(function()
+                {
+                        t.strictEqual('foo', parent.currentState);
+                        t.done();
+                });
         }
-        // todo upgrade
 };
